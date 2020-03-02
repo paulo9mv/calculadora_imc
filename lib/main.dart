@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -7,6 +8,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -20,7 +22,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Calculadora de IMC'),
     );
   }
 }
@@ -44,17 +46,241 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  double _altura = 170;
+  double _peso = 70;
+  String _resultado = "";
+  String _imc = '0';
+  Color _cor;
 
-  void _incrementCounter() {
+  //#4CAF50 verde
+  //#FFEB3B amarelo
+  //#F44336 vermelho
+  List<Color> colors = [
+    Color(0xFF4CAF50),
+    Color(0xFFFFEB3B),
+    Color(0xFFF44336),
+  ];
+
+  var imageAssets = {
+    "feliz": "assets/feliz.png",
+    "medio": "assets/medio.png",
+    "triste": "assets/triste.png",
+  };
+
+  String _imagem = "assets/feliz.png";
+  List<String> mensagens = [
+    "Muito abaixo do peso",
+    "Abaixo do peso",
+    "Peso normal",
+    "Acima do peso",
+    "Obesidade I",
+    "Obesidade II (severa)",
+    "Obesidade III (mórbida)"
+  ];
+
+/*
+  Muito abaixo do peso
+  Abaixo do peso
+  Peso normal
+  Acima do peso
+  Obesidade I
+  Obesidade II (severa)
+  Obesidade III (mórbida)
+ */
+
+  //#4CAF50 verde
+  //#FFEB3B amarelo
+  //#F44336 vermelho
+
+  double calculaIMC(double altura, double peso) {
+    double alturaEmMetros = altura / 100;
+    return peso / (alturaEmMetros * alturaEmMetros);
+  }
+
+  void analisaIMC(altura, peso) {
+    double imc = calculaIMC(altura, peso);
+
+    String resultado;
+    Color cor;
+    String imagem;
+    _imc = imc.toStringAsFixed(2);
+
+    if (imc < 17) {
+      resultado = mensagens[0];
+      cor = colors[2];
+      imagem = imageAssets["triste"];
+    } else if (imc >= 17 && imc < 18.5) {
+      resultado = mensagens[1];
+      cor = colors[1];
+      imagem = imageAssets["medio"];
+    } else if (imc >= 18.5 && imc < 25) {
+      resultado = mensagens[2];
+      cor = colors[0];
+      imagem = imageAssets["feliz"];
+    } else if (imc >= 25 && imc < 30) {
+      resultado = mensagens[3];
+      cor = colors[1];
+      imagem = imageAssets["medio"];
+    } else if (imc >= 30 && imc < 35) {
+      resultado = mensagens[4];
+      cor = colors[2];
+      imagem = imageAssets["triste"];
+    } else if (imc >= 35 && imc < 40) {
+      resultado = mensagens[5];
+      cor = colors[2];
+      imagem = imageAssets["triste"];
+    } else {
+      resultado = mensagens[6];
+      cor = colors[2];
+      imagem = imageAssets["triste"];
+    }
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _resultado = resultado;
+      _cor = cor;
+      _imagem = imagem;
     });
+  }
+
+  Widget CardInput() {
+    var textStyle = new TextStyle(
+      fontFamily: 'CircularStd',
+      fontSize: 20,
+      color: Colors.black,
+    );
+
+    var alturaWidget = new Container(
+        child: new Row(
+      children: <Widget>[
+        new Padding(
+          padding: EdgeInsets.only(left: 15),
+          child: Text(
+            "Altura",
+            style: textStyle,
+          ),
+        ),
+        Expanded(
+          child: Slider(
+            value: _altura,
+            label: _altura.toInt().toString() + " cm",
+            divisions: (220 - 130),
+            min: 130,
+            max: 220,
+            onChanged: (double newValue) {
+              setState(() {
+                _altura = newValue;
+              });
+            },
+            onChangeEnd: (double newValue) {
+              setState(() {
+                _altura = newValue;
+              });
+              analisaIMC(_altura, _peso);
+            },
+          ),
+        ),
+        new Padding(
+          padding: EdgeInsets.only(right: 15),
+          child: Text(_altura.toInt().toString() + " cm"),
+        ),
+      ],
+    ));
+
+    var pesoWidget = new Container(
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Align(
+            alignment: Alignment.centerLeft,
+            child: new Padding(
+              padding: EdgeInsets.only(left: 15, top: 15),
+              child: Text(
+                "Peso",
+                style: textStyle,
+              ),
+            ),
+          ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Slider(
+                  value: _peso,
+                  label: _peso.toInt().toString() + " kg",
+                  divisions: (170 - 40),
+                  min: 40,
+                  max: 170,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      _peso = newValue;
+                    });
+                  },
+                  onChangeEnd: (double newValue) {
+                    analisaIMC(_altura, _peso);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right : 15),
+                child: Text(_peso.toInt().toString() + ' kg'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    return Card(
+      child: Column(
+        children: <Widget>[
+          alturaWidget,
+          pesoWidget,
+        ],
+      ),
+    );
+  }
+
+  Widget CardOutput() {
+    var textStyle = new TextStyle(
+      fontFamily: 'CircularStd',
+      fontSize: 20,
+      color: Colors.black,
+    );
+    var pesoWidget = new Container(
+      child: new Row(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(20),
+            child: Image(
+              height: 100,
+              width: 100,
+              image: new AssetImage(_imagem),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text("IMC $_imc", style: textStyle,),
+              new Text(
+                _resultado,
+                style: textStyle,
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+
+    return Center(
+      child: Card(
+          color: _cor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[pesoWidget],
+          )),
+    );
   }
 
   @override
@@ -91,21 +317,25 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
-            ),
+            Container(
+                margin: EdgeInsets.only(left: 25, right: 25),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      child: CardInput(),
+                    ),
+                    Container(
+                      child: CardOutput(),
+                    )
+                  ],
+                )),
+            Card(
+              margin: EdgeInsets.only(top: 10),
+              elevation: 10,
+            )
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
