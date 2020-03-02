@@ -142,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Widget CardInput() {
+  Widget cardInput() {
     var textStyle = new TextStyle(
       fontFamily: 'CircularStd',
       fontSize: 20,
@@ -239,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget CardOutput() {
+  Widget cardOutput() {
     var textStyle = new TextStyle(
       fontFamily: 'CircularStd',
       fontSize: 20,
@@ -322,10 +322,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   children: <Widget>[
                     Container(
-                      child: CardInput(),
+                      child: cardInput(),
                     ),
                     Container(
-                      child: CardOutput(),
+                      child: cardOutput(),
                     )
                   ],
                 )),
